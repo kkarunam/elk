@@ -93,16 +93,13 @@ openssl req -subj '/CN=server.example.com/' -x509 -days 3650 -nodes -batch -newk
 ```
 ###### Create Logstash config file
 ```
-vi /etc/logstash/conf.d/01-logstash-simple.conf
+vi /etc/logstash/conf.d/logstash-simple.conf
 ```
 Paste the below content
 ```
 input {
   beats {
     port => 5044
-    ssl => true
-    ssl_certificate => "/etc/pki/tls/certs/logstash.crt"
-    ssl_key => "/etc/pki/tls/private/logstash.key"
   }
 }
 
