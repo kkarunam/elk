@@ -1,2 +1,2 @@
 # elk
-Supporting Repo for ELK installation Youtube video
+Refer to INSTALL-ELK-7-CentOS7.md for Installation Steps
