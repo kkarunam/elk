@@ -132,15 +132,19 @@ systemctl enable logstash
 systemctl start logstash
 ```
 ## FileBeat installation on client.example.com
+###### Import PGP Key
+```
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+```
 ###### Create Yum repository
 ```
 cat >>/etc/yum.repos.d/elk.repo<<EOF
-[elasticsearch]
-name=Elasticsearch repository for 7.x packages
+[elastic-7.x]
+name=Elastic repository for 7.x packages
 baseurl=https://artifacts.elastic.co/packages/7.x/yum
 gpgcheck=1
 gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-enabled=0
+enabled=1
 autorefresh=1
 type=rpm-md
 EOF
