@@ -6,10 +6,6 @@ server.example.com __(ELK master)__
 client.example.com __(client machine)__
 
 ## ELK Stack installation on server.example.com
-###### Install Java 8
-```
-yum install -y java-1.8.0-openjdk
-```
 ###### Import PGP Key
 ```
 rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
@@ -58,39 +54,18 @@ systemctl daemon-reload
 systemctl enable kibana
 systemctl start kibana
 ```
-###### Install Nginx
-```
-yum install -y epel-release
-yum install -y nginx
-```
-###### Create Proxy configuration
-Remove server block from the default config file /etc/nginx/nginx.conf
-And create a new config file
-```
-cat >>/etc/nginx/conf.d/kibana.conf<<EOF
-server {
-    listen 80;
-    server_name server.example.com;
-    location / {
-        proxy_pass http://localhost:5601;
-    }
-}
-EOF
-```
-###### Enable and start nginx service
-```
-systemctl enable nginx
-systemctl start nginx
-```
+
 ### Logstash
 ###### Install logstash
 ```
 yum install -y logstash
 ```
+###### Optional Step. This step is required to enable secure connection between Logstash server and client machines that sends data to Logstash
 ###### Generate SSL Certificates
 ```
 openssl req -subj '/CN=server.example.com/' -x509 -days 3650 -nodes -batch -newkey rsa:2048 -keyout /etc/pki/tls/private/logstash.key -out /etc/pki/tls/certs/logstash.crt
 ```
+###### Configure Logstash
 ###### Create Logstash config file
 ```
 vi /etc/logstash/conf.d/logstash-simple.conf
@@ -154,11 +129,33 @@ EOF
 yum install -y filebeat
 ```
 ###### Copy SSL certificate from server.example.com
+###### This step is required only if ssl is enabled on Logstash Server
 ```
 scp server.example.com:/etc/pki/tls/certs/logstash.crt /etc/pki/tls/certs/
 ```
 ###### Configure Filebeat 
-[Refer my youtube video]
+https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration.html
+
+Edit the config file /etc/filebeat/filebeat.yml
+enabled: true
+
+paths:
+  - /var/log/messages
+  
+Comment output.elasticsearch
+Comment hosts: ["localhost:9200"]
+
+Uncomment output.logstash
+hosts: ["server.example.com:5044"]
+###### Optional - If ssl is enabled in Logstash
+Uncomment ssl.certificate_authorities: ["/etc/pki/tls/certs/logstash.crt "]
+
+setup.kibana:
+host: "server.example.com:5601"
+
+systemctl enable filebeat
+systemctl start filebeat
+
 ###### Enable and start Filebeat service
 ```
 systemctl enable filebeat
